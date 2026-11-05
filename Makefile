@@ -1,5 +1,6 @@
-# Build and flash src/blink.c with make.
+# Build and flash an AVR program with make (default PROG=blink -> src/blink.c).
 #   make          -> build build/blink.hex
+#   make PROG=servo_uart flash -> build and upload src/servo_uart.c
 #   make flash    -> build (if needed), then upload
 #   make clean    -> delete build/
 #   PORT=/dev/ttyUSB1 make flash
@@ -13,15 +14,16 @@ CC      := avr-gcc
 OBJCOPY := avr-objcopy
 CFLAGS  := -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Os -std=gnu99 -Wall -Wextra
 
-SRC := src/blink.c
-ELF := build/blink.elf
-HEX := build/blink.hex
+PROG ?= blink
+SRC  := src/$(PROG).c
+ELF  := build/$(PROG).elf
+HEX  := build/$(PROG).hex
 
 .PHONY: all flash clean
 
 all: $(HEX)
 
-# Rebuilt only when blink.c (or this Makefile) is newer than the ELF
+# Rebuilt only when the source (or this Makefile) is newer than the ELF
 $(ELF): $(SRC) Makefile
 	@mkdir -p build
 	$(CC) $(CFLAGS) -o $@ $(SRC)

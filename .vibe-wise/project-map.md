@@ -11,7 +11,8 @@ Bare-metal C firmware (avr-libc, no Arduino core) for an Uno-style clone board. 
 ## Components
 - src/blink.c (implemented): PB5 output; Timer1 CTC, prescaler 1024, OCR1A = 31249 → 2 s; ISR(TIMER1_COMPA_vect) toggles PB5 (XOR, AI addition); empty main loop. Design by learner except XOR toggle, empty loop, and N-1 correction.
 - scripts/build.sh (implemented): manual avr-gcc → avr-objcopy → avr-size → optional avrdude.
-- Makefile (implemented): same steps as make targets all/flash/clean; incremental rebuild.
+- Makefile (implemented): same steps as make targets all/flash/clean; incremental rebuild. PROG variable selects src/$(PROG).c (default blink).
+- src/servo_uart.c (implemented, verified on hardware 2026-11-05): USART0 9600 8N1 polled; command "ddd\n" 000-180 -> Timer1 mode 14 PWM on D9 (1-2 ms / 20 ms); replies OK ddd / ERR INVALID / ERR; BOOT at reset.
 
 ## Main Flow
   src/blink.c --avr-gcc--> build/blink.elf --avr-objcopy--> build/blink.hex --avrdude/Optiboot--> flash
@@ -38,3 +39,8 @@ Build: `scripts/build.sh [flash]` or `make` / `make flash` / `make clean`; PORT 
 - src/esp32/blink.c: polled blink on GPIO2 using the Xtensa CCOUNT cycle counter, 2 s on/off; disables RTC and TIMG0/1 watchdogs; sends '1'/'0' on UART0 each toggle.
 - Build/flash: scripts/build_esp32.sh [flash] (image flashed at 0x1000).
 - Verified on hardware: external LED on GPIO2 blinks 2 s on/off. Board has no GPIO-controlled user LED (its LED is serial activity).
+
+## To-do (parked ideas)
+- ESP32 passkey (parked 2026-11-04). Goal: a real FIDO2/WebAuthn passkey that sites accept, KeePassXC-like; a secret on the laptop plus a secret on the ESP combine to produce the credential, using a laptop<->ESP protocol agreed in advance.
+  - Known constraint: the ESP32-D0WD has no native USB (CP2102 is serial only), so a laptop-side bridge (virtual FIDO HID via /dev/uhid, or a browser extension) or BLE would be needed.
+  - Open questions: where the two secrets combine / who sees the full private key; threat model (stolen ESP, stolen laptop, laptop malware); whether to require a button press on the ESP.
