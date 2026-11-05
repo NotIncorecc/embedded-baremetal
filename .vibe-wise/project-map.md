@@ -1,7 +1,7 @@
 # Project Map
 
 ## Purpose
-Bare-metal C firmware (avr-libc, no Arduino core) for an Uno-style clone board. First milestone: blink the on-board LED.
+Bare-metal C firmware for an Uno-style clone (avr-libc, no Arduino core) and an ESP32 dev board (no ESP-IDF). Blink milestones done on both. Current goal (2026-11-05): learn communication protocols by linking the two boards (UART first, then SPI, I2C), showing as many peripherals as possible from an ESP32 text dashboard.
 
 ## Requirements
 - Language: C with avr-libc headers.
@@ -13,6 +13,17 @@ Bare-metal C firmware (avr-libc, no Arduino core) for an Uno-style clone board. 
 - scripts/build.sh (implemented): manual avr-gcc → avr-objcopy → avr-size → optional avrdude.
 - Makefile (implemented): same steps as make targets all/flash/clean; incremental rebuild. PROG variable selects src/$(PROG).c (default blink).
 - src/periph_uart.c (implemented and hardware verified 2026-11-05; SG90 angle accuracy parked): USART0 9600 8N1 polled; commands S<pin><angle 000-180> and L<pin><pct 000-100> + '\n'; table-driven (cmd_types[], outputs[]); D9/D10 servos on Timer1 mode 14 (1-2 ms / 20 ms), D6 LED on Timer0 fast PWM; replies OK <cmd> / ERR INVALID / ERR; BOOT at reset; '?' -> table rows "T S09 180" ... "T END" (v3, not yet hardware tested).
+- src/power_test.c (implemented and hardware verified 2026-11-05): one-shot supply test; BOOT + 3 LED flashes, then 25 servo/LED steps (single, alternating, both at once, LED ramp), printing "TEST <cmd>" before each; ends "TEST DONE" with servo pulses off.
+
+## Two-board link (hardware verified 2026-11-05)
+  ESP32 GPIO17 (U2TXD) ─────────────────────► AVR D0 (shares the CH340 TX via ~1k; unplug before AVR uploads = option A)
+  AVR D1 ──(10k||10k)──┬──► ESP32 GPIO16 (U2RXD)   divider 5 V → 3.33 V
+                      10k
+                       │
+  ESP32 GND ───────────┴────────────────────► AVR GND
+  ESP32 VIN/5V ─────────────────────────────► AVR 5V pin (powers the AVR, 2x SG90, LED; AVR USB must be unplugged)
+- UART 9600 8N1. Verified: power under full servo load; AVR → ESP32 direction. Not yet verified: ESP32 → AVR direction via the dashboard.
+- Known compromise (option A): CH340 TX pushes ~1.7 mA into GPIO17 when high. Planned fix: diode (cathode to ESP32) + GPIO17 open-drain.
 
 ## Main Flow
   src/blink.c --avr-gcc--> build/blink.elf --avr-objcopy--> build/blink.hex --avrdude/Optiboot--> flash
@@ -34,11 +45,11 @@ Build: `scripts/build.sh [flash]` or `make` / `make flash` / `make clean`; PORT 
 - Physical chip marking not yet confirmed (ATmega328P vs look-alike).
 
 ## ESP32 target (added 2026-11-04)
-- Board: ESP32-D0WD rev v1.0, 4 MB flash, CP2102 USB bridge at /dev/ttyUSB0 (the earlier CH340 Arduino clone is not connected).
+- Board: ESP32-D0WD rev v1.0, 4 MB flash, CP2102 USB bridge. Port number depends on what's plugged in; identify it with /dev/serial/by-id (CP2102 = ESP32, ch340 = AVR).
 - Tools: esptool 5.6.0 via pipx; xtensa-esp32-elf-gcc 16.1.0 in ~/.local/opt/xtensa-esp-elf-16.1.0.
 - src/esp32/blink.c: polled blink on GPIO2 using the Xtensa CCOUNT cycle counter, 2 s on/off; disables RTC and TIMG0/1 watchdogs; sends '1'/'0' on UART0 each toggle.
 - Build/flash: [APP=name] scripts/build_esp32.sh [flash] (default APP=blink; image flashed at 0x1000).
-- src/esp32/dashboard.c (implemented 2026-11-05, not yet hardware tested): text dashboard on UART0 115200; UART2 9600 on GPIO17 TX / GPIO16 RX to the AVR; fetches the AVR table with '?', validates, forwards; prints AVR replies async; 200 ms no-reply warning.
+- src/esp32/dashboard.c (implemented 2026-11-05; UART2 RX + async printing verified on hardware, command/table path not yet): text dashboard on UART0 115200; UART2 9600 on GPIO17 TX / GPIO16 RX to the AVR; fetches the AVR table with '?', validates, forwards; prints AVR replies async; 200 ms no-reply warning.
 - Verified on hardware: external LED on GPIO2 blinks 2 s on/off. Board has no GPIO-controlled user LED (its LED is serial activity).
 
 ## To-do (parked ideas)

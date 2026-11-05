@@ -83,8 +83,17 @@
 - AI recommendation (asked for): one change at a time; power test first on option A wiring, diode experiment as its own later step.
 - Open (asked): how a brownout reset would be noticed during the self-test; separate program vs a boot-time step in periph_uart; sequence/order (one servo at a time vs both).
 - Learner answers: watch for BOOT on the dashboard; servos are the heaviest load; servos move alternately and one after another, with delays; separate test program.
-- Power test APPROVED ("Implement this step") and implemented 2026-11-05: src/power_test.c (25 steps; BOOT + 3 LED flashes; single -> alternating -> both at once -> LED ramp -> park; TEST lines; ends TEST DONE with servo pulses off). Builds with no warnings (790 B flash, 168 B RAM). NOT yet run on hardware.
-- Next: learner flashes and runs the laptop terminal test; then Step 2 checkpoint (ESP32 UART2 + board-to-board wiring with divider).
+- Power test APPROVED ("Implement this step") and implemented 2026-11-05: src/power_test.c (25 steps; BOOT + 3 LED flashes; single -> alternating -> both at once -> LED ramp -> park; TEST lines; ends TEST DONE with servo pulses off). Builds with no warnings (790 B flash, 168 B RAM).
+- HARDWARE VERIFIED by learner 2026-11-05: "everything worked well", and "AVR: ..." lines showed on the ESP32 dashboard. Confirms:
+  - ESP32 VIN/5V can power the AVR + 2x SG90 + LED, including both servos moving at once (no brownout reported).
+  - The AVR -> ESP32 direction works end to end: AVR TX (D1) -> 5k/10k divider -> GPIO16 -> GPIO matrix -> UART2 RX at 9600 (CLKDIV 4166 + 11/16 from 40 MHz APB); the dashboard's async line printing works.
+- Learner reasoning: the AVR messages show "the other UART line" works. Correct for AVR -> ESP32. Not yet shown: the ESP32 -> AVR direction (GPIO17 -> D0). power_test only transmits, so the dashboard's commands, the '?' table fetch and the OK/ERR replies are still untested on hardware.
+
+### Status (2026-11-05)
+- Done + hardware verified: AVR protocol v2 over USB; the 4-wire link (TX, RX, 5V, GND) with option A; ESP32-powered AVR under full servo load; the AVR -> ESP32 UART direction.
+- Built, not hardware verified: the ESP32 dashboard command path (ESP32 -> AVR), the '?' table query, the 200 ms no-reply warning.
+- Next: flash periph_uart back (5V + GPIO17 wires off during the upload) and run the dashboard test table from the step 2b report.
+- Later: diode + open-drain experiment on GPIO17 (one change at a time, after the dashboard is verified); SG90 angle accuracy (parked); further protocols: SPI, I2C (the I2C open-drain idea was already introduced through the diode discussion).
 
 ## ESP32 passkey project (PARKED by learner 2026-11-04: "a bit overwhelming now"; see project-map.md To-do)
 - Introduced (AI explained): password-typer vs real FIDO2/WebAuthn passkey; classic ESP32 has no native USB (CP2102 is serial only), so it can't be a USB HID device; BLE / other chip / laptop helper are the routes; flash can be dumped with esptool.
