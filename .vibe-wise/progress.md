@@ -62,7 +62,13 @@
 - Open (asked): "dashboard" = serial-terminal text UI (bare-metal OK) or web page over WiFi (needs Espressif's closed WiFi stack via ESP-IDF/Arduino, not bare-metal)?
 - Learner decisions: text dashboard on the serial port (UART0); project aim = show as many peripherals as possible; commands must name the peripheral type and the pin it is on.
 - AI explained: on the Uno only some pins have hardware PWM, and only Timer1 (D9/D10) gives clean 50 Hz servo timing in hardware.
-- Open (asked): exact command grammar, byte by byte; fixed vs variable length; replies for an unknown type or bad pin; protocol change now or after the plain ESP32<->AVR link works. No design confirmed, no code.
+- Open (asked): exact command grammar, byte by byte; fixed vs variable length; replies for an unknown type or bad pin; protocol change now or after the plain ESP32<->AVR link works.
+- Learner decisions: short format "S09090\n" (type letter + 2-digit pin + 3-digit value); LED as "L100" (= 100% output); fixed length per command type ("whatever convention makes it scalable"); change the protocol now; add a second servo now.
+- Demonstrated understanding: said the AVR cannot detect what is attached; only the designer knows which peripheral is on which pin (leads to a firmware pin-assignment table).
+- Feedback given: "L100" has no pin, which breaks the learner's own rule; LED "%" is a PWM duty cycle, not a voltage level; D13 has no PWM.
+- Step 2a APPROVED ("Implement this step") and implemented 2026-11-05: src/servo_uart.c renamed to src/periph_uart.c. Protocol v2: S<pin><angle>, L<pin><pct>; cmd_types[] + outputs[] tables; D9/D10 servos (Timer1 OC1A/OC1B), D6 LED (Timer0 OC0A ~977 Hz; 0 % disconnects PWM, drives low); replies echo the command.
+- Verified: AVR build has no warnings (890 B flash, 48 B RAM). A throwaway host test in the scratchpad (stub registers) ran 16 commands: all expected OK/INVALID, register values correct, rejected commands changed nothing. NOT yet flashed or tested on hardware.
+- Next: learner flashes + runs the hardware test; then Step 2b (ESP32 text dashboard on UART0 <-> UART2 GPIO17/16).
 - Next: learner flashes and runs the laptop terminal test; then Step 2 checkpoint (ESP32 UART2 + board-to-board wiring with divider).
 
 ## ESP32 passkey project (PARKED by learner 2026-11-04: "a bit overwhelming now"; see project-map.md To-do)

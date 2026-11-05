@@ -12,7 +12,7 @@ Bare-metal C firmware (avr-libc, no Arduino core) for an Uno-style clone board. 
 - src/blink.c (implemented): PB5 output; Timer1 CTC, prescaler 1024, OCR1A = 31249 → 2 s; ISR(TIMER1_COMPA_vect) toggles PB5 (XOR, AI addition); empty main loop. Design by learner except XOR toggle, empty loop, and N-1 correction.
 - scripts/build.sh (implemented): manual avr-gcc → avr-objcopy → avr-size → optional avrdude.
 - Makefile (implemented): same steps as make targets all/flash/clean; incremental rebuild. PROG variable selects src/$(PROG).c (default blink).
-- src/servo_uart.c (implemented, verified on hardware 2026-11-05): USART0 9600 8N1 polled; command "ddd\n" 000-180 -> Timer1 mode 14 PWM on D9 (1-2 ms / 20 ms); replies OK ddd / ERR INVALID / ERR; BOOT at reset.
+- src/periph_uart.c (implemented 2026-11-05; v1 servo-only version was hardware verified, v2 not yet): USART0 9600 8N1 polled; commands S<pin><angle 000-180> and L<pin><pct 000-100> + '\n'; table-driven (cmd_types[], outputs[]); D9/D10 servos on Timer1 mode 14 (1-2 ms / 20 ms), D6 LED on Timer0 fast PWM; replies OK <cmd> / ERR INVALID / ERR; BOOT at reset.
 
 ## Main Flow
   src/blink.c --avr-gcc--> build/blink.elf --avr-objcopy--> build/blink.hex --avrdude/Optiboot--> flash
