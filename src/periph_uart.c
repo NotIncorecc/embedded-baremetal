@@ -15,6 +15,11 @@
  *   "BOOT\n"          sent once at reset (spot brownouts in the log)
  * On any error, outputs are left unchanged.
  *
+ * Table query: "?\n" -> one line per declared output, then an end marker:
+ *   "T S09 180\n" ... "T END\n"   (letter+pin, then max value; the width of
+ *                                   the max field = number of value digits)
+ * The AVR is the single source of truth; the ESP32 asks and validates against it.
+ *
  * The AVR cannot detect what is wired to a pin; the pin table is the
  * designer's declaration. To add a peripheral: add a row to cmd_types[]
  * (if it is a new type) and a row to outputs[].
@@ -152,15 +157,48 @@ static int8_t read_digits(const char *s, uint8_t n, uint16_t *out)
     return 0;
 }
 
+static const struct cmd_type *find_type(char letter)
+{
+    for (uint8_t i = 0; i < COUNT(cmd_types); i++) {
+        if (cmd_types[i].letter == letter) {
+            return &cmd_types[i];
+        }
+    }
+    return 0;
+}
+
+/* Prints v as exactly `digits` decimal digits, zero-padded. */
+static void put_num(uint16_t v, uint8_t digits)
+{
+    char d[5];
+    for (uint8_t i = digits; i > 0; i--) {
+        d[i - 1] = (char)('0' + v % 10u);
+        v /= 10u;
+    }
+    for (uint8_t i = 0; i < digits; i++) {
+        uart_putc(d[i]);
+    }
+}
+
+/* Answer to "?": the outputs table, one row per line, then "T END". */
+static void send_table(void)
+{
+    for (uint8_t i = 0; i < COUNT(outputs); i++) {
+        const struct cmd_type *type = find_type(outputs[i].letter);
+        uart_puts("T ");
+        uart_putc(outputs[i].letter);
+        put_num(outputs[i].pin, PIN_DIGITS);
+        uart_putc(' ');
+        put_num(type->max_value, type->value_digits);
+        uart_putc('\n');
+    }
+    uart_puts("T END\n");
+}
+
 /* Validates one line and applies it. Returns 0 on success, -1 if invalid. */
 static int8_t execute(const char *buf, uint8_t len)
 {
-    const struct cmd_type *type = 0;
-    for (uint8_t i = 0; i < COUNT(cmd_types); i++) {
-        if (len > 0 && cmd_types[i].letter == buf[0]) {
-            type = &cmd_types[i];
-        }
-    }
+    const struct cmd_type *type = (len > 0) ? find_type(buf[0]) : 0;
     if (!type || len != 1u + PIN_DIGITS + type->value_digits) {
         return -1;
     }
@@ -183,6 +221,10 @@ static int8_t execute(const char *buf, uint8_t len)
 
 static void handle_line(const char *buf, uint8_t len)
 {
+    if (len == 1 && buf[0] == '?') {
+        send_table();
+        return;
+    }
     if (execute(buf, len) < 0) {
         uart_puts("ERR INVALID\n");
         return;

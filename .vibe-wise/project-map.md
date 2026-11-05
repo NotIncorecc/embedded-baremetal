@@ -12,7 +12,7 @@ Bare-metal C firmware (avr-libc, no Arduino core) for an Uno-style clone board. 
 - src/blink.c (implemented): PB5 output; Timer1 CTC, prescaler 1024, OCR1A = 31249 → 2 s; ISR(TIMER1_COMPA_vect) toggles PB5 (XOR, AI addition); empty main loop. Design by learner except XOR toggle, empty loop, and N-1 correction.
 - scripts/build.sh (implemented): manual avr-gcc → avr-objcopy → avr-size → optional avrdude.
 - Makefile (implemented): same steps as make targets all/flash/clean; incremental rebuild. PROG variable selects src/$(PROG).c (default blink).
-- src/periph_uart.c (implemented 2026-11-05; v1 servo-only version was hardware verified, v2 not yet): USART0 9600 8N1 polled; commands S<pin><angle 000-180> and L<pin><pct 000-100> + '\n'; table-driven (cmd_types[], outputs[]); D9/D10 servos on Timer1 mode 14 (1-2 ms / 20 ms), D6 LED on Timer0 fast PWM; replies OK <cmd> / ERR INVALID / ERR; BOOT at reset.
+- src/periph_uart.c (implemented and hardware verified 2026-11-05; SG90 angle accuracy parked): USART0 9600 8N1 polled; commands S<pin><angle 000-180> and L<pin><pct 000-100> + '\n'; table-driven (cmd_types[], outputs[]); D9/D10 servos on Timer1 mode 14 (1-2 ms / 20 ms), D6 LED on Timer0 fast PWM; replies OK <cmd> / ERR INVALID / ERR; BOOT at reset; '?' -> table rows "T S09 180" ... "T END" (v3, not yet hardware tested).
 
 ## Main Flow
   src/blink.c --avr-gcc--> build/blink.elf --avr-objcopy--> build/blink.hex --avrdude/Optiboot--> flash
@@ -37,10 +37,12 @@ Build: `scripts/build.sh [flash]` or `make` / `make flash` / `make clean`; PORT 
 - Board: ESP32-D0WD rev v1.0, 4 MB flash, CP2102 USB bridge at /dev/ttyUSB0 (the earlier CH340 Arduino clone is not connected).
 - Tools: esptool 5.6.0 via pipx; xtensa-esp32-elf-gcc 16.1.0 in ~/.local/opt/xtensa-esp-elf-16.1.0.
 - src/esp32/blink.c: polled blink on GPIO2 using the Xtensa CCOUNT cycle counter, 2 s on/off; disables RTC and TIMG0/1 watchdogs; sends '1'/'0' on UART0 each toggle.
-- Build/flash: scripts/build_esp32.sh [flash] (image flashed at 0x1000).
+- Build/flash: [APP=name] scripts/build_esp32.sh [flash] (default APP=blink; image flashed at 0x1000).
+- src/esp32/dashboard.c (implemented 2026-11-05, not yet hardware tested): text dashboard on UART0 115200; UART2 9600 on GPIO17 TX / GPIO16 RX to the AVR; fetches the AVR table with '?', validates, forwards; prints AVR replies async; 200 ms no-reply warning.
 - Verified on hardware: external LED on GPIO2 blinks 2 s on/off. Board has no GPIO-controlled user LED (its LED is serial activity).
 
 ## To-do (parked ideas)
+- SG90 angle accuracy/jitter (parked 2026-11-05): commanded angle doesn't match the rotation. Suspects: PULSE_MIN/MAX (1-2 ms) narrower than the SG90's travel, USB 5 V sag.
 - ESP32 passkey (parked 2026-11-04). Goal: a real FIDO2/WebAuthn passkey that sites accept, KeePassXC-like; a secret on the laptop plus a secret on the ESP combine to produce the credential, using a laptop<->ESP protocol agreed in advance.
   - Known constraint: the ESP32-D0WD has no native USB (CP2102 is serial only), so a laptop-side bridge (virtual FIDO HID via /dev/uhid, or a browser extension) or BLE would be needed.
   - Open questions: where the two secrets combine / who sees the full private key; threat model (stolen ESP, stolen laptop, laptop malware); whether to require a button press on the ESP.

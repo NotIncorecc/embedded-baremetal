@@ -1,0 +1,59 @@
+
+Merging object attributes
+
+
+There are no discarded input sections
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+iram             0x40080000         0x00020000
+dram             0x3ffb0000         0x0002c000
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD /tmp/cco3fwSK.o
+
+.iram.text      0x40080000      0x7f6
+ *(.text.call_start_cpu0)
+ .text.call_start_cpu0
+                0x40080000      0x6a0 /tmp/cco3fwSK.o
+                                0x7fb (size before relaxing)
+                0x400800c8                call_start_cpu0
+ *(.literal .literal.*)
+ *fill*         0x400806a0        0x0 
+ .literal       0x400806a0        0x0 /tmp/cco3fwSK.o
+ .literal.call_start_cpu0
+                0x400806a0        0x0 /tmp/cco3fwSK.o
+ *(.text .text.*)
+ .text          0x400806a0      0x156 /tmp/cco3fwSK.o
+                                0x15a (size before relaxing)
+
+.dram.rodata    0x3ffb0000      0x1c7
+ *(.rodata .rodata.*)
+ .rodata.str1.1
+                0x3ffb0000      0x1c7 /tmp/cco3fwSK.o
+                                0x1d6 (size before relaxing)
+OUTPUT(/home/gokulganesan/ardunio-baremetal/build/esp32/dashboard.elf elf32-xtensa-le)
+
+.data           0x3ffb01c7        0x0
+ .data          0x3ffb01c7        0x0 /tmp/cco3fwSK.o
+
+.bss            0x3ffb01c7        0x0
+ .bss           0x3ffb01c7        0x0 /tmp/cco3fwSK.o
+
+.comment        0x00000000       0x2f
+ .comment       0x00000000       0x2f /tmp/cco3fwSK.o
+                                 0x30 (size before relaxing)
+
+.xtensa.info    0x00000000       0x38
+ .xtensa.info   0x00000000       0x38 /tmp/cco3fwSK.o
+
+.xt.lit         0x00000000       0x28
+ .xt.lit        0x00000000       0x28 /tmp/cco3fwSK.o
+                                 0x30 (size before relaxing)
+
+.xt.prop        0x00000000      0x528
+ .xt.prop       0x00000000      0x528 /tmp/cco3fwSK.o
+                                0x534 (size before relaxing)
