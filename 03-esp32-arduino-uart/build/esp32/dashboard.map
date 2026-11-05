@@ -13,47 +13,47 @@ dram             0x3ffb0000         0x0002c000
 
 Linker script and memory map
 
-LOAD /tmp/ccqyaQO0.o
+LOAD /tmp/ccTHE39n.o
 
 .iram.text      0x40080000      0x7f6
  *(.text.call_start_cpu0)
  .text.call_start_cpu0
-                0x40080000      0x6a0 /tmp/ccqyaQO0.o
+                0x40080000      0x6a0 /tmp/ccTHE39n.o
                                 0x7fb (size before relaxing)
                 0x400800c8                call_start_cpu0
  *(.literal .literal.*)
  *fill*         0x400806a0        0x0 
- .literal       0x400806a0        0x0 /tmp/ccqyaQO0.o
+ .literal       0x400806a0        0x0 /tmp/ccTHE39n.o
  .literal.call_start_cpu0
-                0x400806a0        0x0 /tmp/ccqyaQO0.o
+                0x400806a0        0x0 /tmp/ccTHE39n.o
  *(.text .text.*)
- .text          0x400806a0      0x156 /tmp/ccqyaQO0.o
+ .text          0x400806a0      0x156 /tmp/ccTHE39n.o
                                 0x15a (size before relaxing)
 
 .dram.rodata    0x3ffb0000      0x1c7
  *(.rodata .rodata.*)
  .rodata.str1.1
-                0x3ffb0000      0x1c7 /tmp/ccqyaQO0.o
+                0x3ffb0000      0x1c7 /tmp/ccTHE39n.o
                                 0x1d6 (size before relaxing)
-OUTPUT(/home/gokulganesan/ardunio-baremetal/build/esp32/dashboard.elf elf32-xtensa-le)
+OUTPUT(/home/gokulganesan/ardunio-baremetal/03-esp32-arduino-uart/build/esp32/dashboard.elf elf32-xtensa-le)
 
 .data           0x3ffb01c7        0x0
- .data          0x3ffb01c7        0x0 /tmp/ccqyaQO0.o
+ .data          0x3ffb01c7        0x0 /tmp/ccTHE39n.o
 
 .bss            0x3ffb01c7        0x0
- .bss           0x3ffb01c7        0x0 /tmp/ccqyaQO0.o
+ .bss           0x3ffb01c7        0x0 /tmp/ccTHE39n.o
 
 .comment        0x00000000       0x2f
- .comment       0x00000000       0x2f /tmp/ccqyaQO0.o
+ .comment       0x00000000       0x2f /tmp/ccTHE39n.o
                                  0x30 (size before relaxing)
 
 .xtensa.info    0x00000000       0x38
- .xtensa.info   0x00000000       0x38 /tmp/ccqyaQO0.o
+ .xtensa.info   0x00000000       0x38 /tmp/ccTHE39n.o
 
 .xt.lit         0x00000000       0x28
- .xt.lit        0x00000000       0x28 /tmp/ccqyaQO0.o
+ .xt.lit        0x00000000       0x28 /tmp/ccTHE39n.o
                                  0x30 (size before relaxing)
 
 .xt.prop        0x00000000      0x528
- .xt.prop       0x00000000      0x528 /tmp/ccqyaQO0.o
+ .xt.prop       0x00000000      0x528 /tmp/ccTHE39n.o
                                 0x534 (size before relaxing)

@@ -13,38 +13,38 @@ dram             0x3ffb0000         0x0002c000
 
 Linker script and memory map
 
-LOAD /tmp/ccM6ELa2.o
+LOAD /tmp/ccAtZi04.o
 
 .iram.text      0x40080000       0xf4
  *(.text.call_start_cpu0)
  .text.call_start_cpu0
-                0x40080000       0xf4 /tmp/ccM6ELa2.o
+                0x40080000       0xf4 /tmp/ccAtZi04.o
                 0x40080034                call_start_cpu0
  *(.literal .literal.*)
  .literal.call_start_cpu0
-                0x400800f4        0x0 /tmp/ccM6ELa2.o
+                0x400800f4        0x0 /tmp/ccAtZi04.o
  *(.text .text.*)
- .text          0x400800f4        0x0 /tmp/ccM6ELa2.o
+ .text          0x400800f4        0x0 /tmp/ccAtZi04.o
 
 .data           0x400800f4        0x0
- .data          0x400800f4        0x0 /tmp/ccM6ELa2.o
+ .data          0x400800f4        0x0 /tmp/ccAtZi04.o
 
 .bss            0x400800f4        0x0
- .bss           0x400800f4        0x0 /tmp/ccM6ELa2.o
+ .bss           0x400800f4        0x0 /tmp/ccAtZi04.o
 
 .dram.rodata
  *(.rodata .rodata.*)
-OUTPUT(/home/gokulganesan/ardunio-baremetal/build/esp32/blink.elf elf32-xtensa-le)
+OUTPUT(/home/gokulganesan/ardunio-baremetal/02-esp32-blink/build/blink.elf elf32-xtensa-le)
 
 .comment        0x00000000       0x2f
- .comment       0x00000000       0x2f /tmp/ccM6ELa2.o
+ .comment       0x00000000       0x2f /tmp/ccAtZi04.o
                                  0x30 (size before relaxing)
 
 .xtensa.info    0x00000000       0x38
- .xtensa.info   0x00000000       0x38 /tmp/ccM6ELa2.o
+ .xtensa.info   0x00000000       0x38 /tmp/ccAtZi04.o
 
 .xt.lit         0x00000000        0x8
- .xt.lit        0x00000000        0x8 /tmp/ccM6ELa2.o
+ .xt.lit        0x00000000        0x8 /tmp/ccAtZi04.o
 
 .xt.prop        0x00000000       0x48
- .xt.prop       0x00000000       0x48 /tmp/ccM6ELa2.o
+ .xt.prop       0x00000000       0x48 /tmp/ccAtZi04.o
